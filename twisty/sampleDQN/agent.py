@@ -63,9 +63,9 @@ def main( _ ) :
             # 각 배치별 평균점수
             batch_end = game.total_reward
             try:
-                batch_point = batch_end - batch_start/100
+                batch_point = batch_end - batch_start/batch
             except:
-                batch_point = batch_start/100
+                batch_point = batch_start/batch
             batch_start = game.total_reward
 
             print( " 게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
