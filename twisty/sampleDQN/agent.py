@@ -17,11 +17,15 @@ n_action = 3
 size = 144
 # 총 진행할 게임 횟수
 episode = 5000
-batch = 100
+batch = 50
 # 한게임당 큐브 회전 횟수 제한
-max_play = 50
+max_play = 100
 # 게임 진행 횟수
 play_count = 0
+
+def logging(log):
+    with open('done.logs',mode='a') as logs:
+        logs.write(log)
 
 
 def main( _ ) :
@@ -49,13 +53,23 @@ def main( _ ) :
             brain.step( state, action, reward, gameover )
 
         if game.cube.done:
-            print(game.total_game,'번째에서',game.cube.count,'회전만으로 큐브 완성!')
+            text = '{}번째에서 {} 회전만으로 큐브 완성! 총 보상은 {}점'.format(game.total_game,game.cube.count,game.cube.point)
+            logging(text)
+            print(text)
         if game.total_game % batch == 0:
+            # 각 배치 실행 시간
             end = time.time()
             runtime = end - start
+            # 각 배치별 평균점수
+            batch_end = game.total_reward
+            try:
+                batch_point = batch_end - batch_start/100
+            except:
+                batch_point = batch_start/100
+            batch_start = game.total_reward
 
-            print( " 게임 진행횟수: {}, 평균보상: {}, \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
-                    game.total_game, game.total_reward / game.total_game, game.cube.done,
+            print( " 게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
+                    game.total_game, game.total_reward / game.total_game,batch_point, game.cube.done,
                     game.cube.count,runtime ) )
             start = time.time()
 
