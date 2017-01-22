@@ -65,7 +65,7 @@ def main( _ ) :
             try:
                 batch_point = batch_end - batch_start/batch
             except:
-                batch_point = batch_start/batch
+                batch_point = game.total_game/batch
             batch_start = game.total_reward
 
             print( " 게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
