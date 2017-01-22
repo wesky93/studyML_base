@@ -8,6 +8,7 @@ import time
 from twistyRL import poketCube
 from game import Game
 from model import DQN
+import time
 
 tf.app.flags.DEFINE_boolean( "train", False, "학습모드. 게임을 화면에 보여주지 않습니다." )
 FLAGS = tf.app.flags.FLAGS
@@ -16,9 +17,9 @@ n_action = 3
 size = 144
 # 총 진행할 게임 횟수
 episode = 5000
-batch = 200
+batch = 100
 # 한게임당 큐브 회전 횟수 제한
-max_play = 100
+max_play = 50
 # 게임 진행 횟수
 play_count = 0
 
@@ -28,7 +29,7 @@ def main( _ ) :
     n_action = len( game.set )
     state = game.get_state( )
     brain = DQN( n_action, size, state )
-
+    start = time.time()
     while 1 :
         game.reset( )
         gameover = FLAGS.train
@@ -50,9 +51,13 @@ def main( _ ) :
         if game.cube.done:
             print(game.total_game,'번째에서',game.cube.count,'회전만으로 큐브 완성!')
         if game.total_game % batch == 0:
-            print( " 게임 진행횟수: {}, 평균보상: {}, , 게임 완료 여부 : {},큐브 회전 횟수: {}".format(
+            end = time.time()
+            runtime = end - start
+
+            print( " 게임 진행횟수: {}, 평균보상: {}, , 게임 완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
                     game.total_game, game.total_reward / game.total_game, game.cube.done,
-                    game.cube.count ) )
+                    game.cube.count,runtime ) )
+            start = time.time()
 
 
 if __name__ == '__main__' :
