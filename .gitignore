@@ -56,3 +56,14 @@ docs/_build/
 
 # PyBuilder
 target/
+
+.idea
+model/
+logs/
+.DS_Store
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+.idea/studyML_base.iml
+.idea/workspace.xml
+
