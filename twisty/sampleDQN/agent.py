@@ -54,7 +54,7 @@ def main( _ ) :
             end = time.time()
             runtime = end - start
 
-            print( " 게임 진행횟수: {}, 평균보상: {}, , 게임 완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
+            print( " 게임 진행횟수: {}, 평균보상: {}, \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
                     game.total_game, game.total_reward / game.total_game, game.cube.done,
                     game.cube.count,runtime ) )
             start = time.time()

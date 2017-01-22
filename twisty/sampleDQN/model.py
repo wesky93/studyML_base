@@ -33,7 +33,7 @@ class DQN :
         self.epsilon = self.INITIAL_EPSILON
         # 게임의 상태. 게임판의 상태를 말합니다.
         # 학습으로 계산할 상태는 현재 게임판과, 과거 세 번의 게임판, 총 네 가지의 상태를 사용합니다.
-        self.state_t = np.stack( (state, state, state, state), axis=1 )[ 0 ]
+        self.state_t = np.stack( (state, state), axis=1 )[ 0 ]
         # 현재 상태만으로 학습하도록 변경
         # self.state_t = np.stack((state), axis=1)[0]
         # 게임 플레이결과를 저장할 메모리
