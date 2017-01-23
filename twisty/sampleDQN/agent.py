@@ -9,6 +9,7 @@ from twistyRL import poketCube
 from game import Game
 from model import DQN
 import time
+from os import path
 
 tf.app.flags.DEFINE_boolean( "train", False, "학습모드. 게임을 화면에 보여주지 않습니다." )
 FLAGS = tf.app.flags.FLAGS
@@ -17,23 +18,43 @@ n_action = 3
 size = 144
 # 총 진행할 게임 횟수
 episode = 5000
-batch = 50
+batch = 1000
 # 한게임당 큐브 회전 횟수 제한
 max_play = 100
+# 스크램 길이 설정
+scram_size = 5
 # 게임 진행 횟수
 play_count = 0
 
-def logging(log):
-    with open('done.logs',mode='a') as logs:
-        logs.write(log)
+# 완성한 횟수
+done_count = 0
+done_percent = 0
+
+# 배치별 성공확률 기록
+batch_track = [ ]
+
+def logging( log, file ) :
+    train_day = time.strftime('%Y-%m-%d-')
+    with open( path.join('train_log','{}{}'.format(train_day,file)), mode='a' ) as logs :
+        logs.write( '\n{}'.format(log) )
 
 
 def main( _ ) :
-    game = Game( max_play )
+    logname = input( "로그 파일 명을 입력하세요!" )
+    game = Game( scram_size )
     n_action = len( game.set )
     state = game.get_state( )
     brain = DQN( n_action, size, state )
-    start = time.time()
+    start = time.time( )
+    befor_total_reward = 0
+
+    # 완성한 횟수
+    befor_done_count = 0
+    done_count = 0
+    done_percent = 0
+
+
+
     while 1 :
         game.reset( )
         gameover = FLAGS.train
@@ -43,8 +64,8 @@ def main( _ ) :
             # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
             reward, gameover = game.proceed( np.argmax( action ) )
             # 점수를 받을 경우 출력
-            if reward >= 12 :
-                print( game.total_game, '번 게임의 ', game.cube.count, '번째 회전에서 ', reward, '점 획득!!' )
+            # if reward > 0 :
+            #     print( game.total_game, '번 게임의 ', game.cube.count, '번째 회전에서 ', reward, '점 획득!!' )
             # 위에서 결정한 액션에 따른 현재 상태를 가져옵니다.
             # 상태는 screen_width x screen_height 크기의 화면 구성입니다.
             state = game.get_state( )
@@ -52,26 +73,45 @@ def main( _ ) :
             # DQN 으로 학습을 진행합니다.
             brain.step( state, action, reward, gameover )
 
-        if game.cube.done:
-            text = '{}번째에서 {} 회전만으로 큐브 완성! 총 보상은 {}점'.format(game.total_game,game.cube.count,game.cube.point)
-            logging(text)
-            print(text)
-        if game.total_game % batch == 0:
-            # 각 배치 실행 시간
-            end = time.time()
-            runtime = end - start
-            # 각 배치별 평균점수
-            batch_end = game.total_reward
-            try:
-                batch_point = batch_end - batch_start/batch
-            except:
-                batch_point = game.total_game/batch
-            batch_start = game.total_reward
+        if game.cube.done :
+            text = '{}번째에서 {} 회전만으로 큐브 완성! 총 점수는 {}점!'.format( game.total_game, game.cube.count,
+                                                               game.cube.point )
+            done_count += 1
+            logging( text, logname )
 
-            print( " 게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {}".format(
-                    game.total_game, game.total_reward / game.total_game,batch_point, game.cube.done,
-                    game.cube.count,runtime ) )
-            start = time.time()
+            print( text )
+        if game.total_game % batch == 0 :
+            # 각 배치 실행 시간
+            end = time.time( )
+            runtime = end - start
+
+            # 각 배치별 성공 활률
+            batch_done_count = done_count - befor_done_count
+            befor_done_count = done_count
+            # 각 배치별 평균점수
+            batch_total_reward = game.total_reward - befor_total_reward
+            befor_total_reward = game.total_reward
+
+            # 배치별 평균 보상
+            batch_avg_reward = batch_total_reward / batch
+            # 배치별 큐브 완성 확률
+            batch_done_percent = batch_done_count / batch * 100
+
+            # 전체 평균 보상
+            Avg_Allreward = game.total_reward / game.total_game
+            # 전체 큐브 완성 확률
+            ALL_done_percent = done_count / game.total_game * 100
+
+            # 배치별 완성 활률 기록
+            batch_track.append( batch_done_percent )
+
+            batch_state = "=================\n게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {},\n전체 큐브 완성 확률 {}%, 배치별 큐브 완성 확률 {}%\n현재까지 확률 추이: {}" \
+                .format( game.total_game, Avg_Allreward, batch_avg_reward, game.cube.done,
+                         game.cube.count, runtime, ALL_done_percent, batch_done_percent,batch_track )
+            print(batch_state)
+
+            logging(batch_state,logname)
+            start = time.time( )
 
 
 if __name__ == '__main__' :

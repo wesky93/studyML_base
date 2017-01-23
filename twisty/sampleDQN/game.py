@@ -4,7 +4,7 @@ import random
 
 
 class Game:
-    def __init__(self,max_play):
+    def __init__(self,scram_size=25):
 
         self.cube = poketCube( )
         self.set = self.cube.set
@@ -12,7 +12,10 @@ class Game:
         self.total_reward = 0.
         self.current_reward = 0.
         self.total_game = 0
-        self.max_play = max_play
+        # 스크램블 길이
+        self.scram_size = scram_size
+        # 최대 회전 횟수는 스크램블 사이즈의 두배로 고
+        self.max_play = self.scram_size*2
 
     def onehot_state(self,state):
         # 큐브 상태를 one-hot상태로 변경함
@@ -39,8 +42,8 @@ class Game:
 
     def reset(self):
         """자동차, 장애물의 위치와 보상값들을 초기화합니다."""
-        self.cube.reset()
-        self.cube.scramble()
+        self.cube = poketCube( )
+        self.cube.scramble(len=self.scram_size,count=2)
         self.total_game += 1
         self.current_reward = 0
 
