@@ -81,8 +81,8 @@ def main( _ ) :
             done_count += 1
             max_rotae = game.cube.count if max_rotae < game.cube.count else max_rotae
             # logging( text, logname )
+            # print( text )
 
-            print( text )
         if game.total_game % batch == 0 :
             # 각 배치 실행 시간
             end = time.time( )
