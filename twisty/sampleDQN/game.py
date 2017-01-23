@@ -42,8 +42,8 @@ class Game:
 
     def reset(self):
         """자동차, 장애물의 위치와 보상값들을 초기화합니다."""
-        self.cube = poketCube( )
-        self.cube.scramble(len=self.scram_size,count=2)
+        self.cube.reset()
+        self.cube.scramble(len=self.scram_size,count=1,checkface=2)
         self.total_game += 1
         self.current_reward = 0
 
