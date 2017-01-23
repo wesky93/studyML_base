@@ -33,10 +33,11 @@ done_percent = 0
 # 배치별 성공확률 기록
 batch_track = [ ]
 
+
 def logging( log, file ) :
-    train_day = time.strftime('%Y-%m-%d-')
-    with open( path.join('train_log','{}{}'.format(train_day,file)), mode='a' ) as logs :
-        logs.write( '\n{}'.format(log) )
+    train_day = time.strftime( '%Y-%m-%d-' )
+    with open( path.join( 'train_log', '{}{}'.format( train_day, file ) ), mode='a' ) as logs :
+        logs.write( '\n{}'.format( log ) )
 
 
 def main( _ ) :
@@ -53,7 +54,8 @@ def main( _ ) :
     done_count = 0
     done_percent = 0
 
-
+    # 완성 성공한 게임의 최대 회전 횟수
+    max_rotae = 0
 
     while 1 :
         game.reset( )
@@ -74,10 +76,11 @@ def main( _ ) :
             brain.step( state, action, reward, gameover )
 
         if game.cube.done :
-            text = '{}번째에서 {} 회전만으로 큐브 완성! 총 점수는 {}점!'.format( game.total_game, game.cube.count,
-                                                               game.cube.point )
+            # text = '{}번째에서 {} 회전만으로 큐브 완성! 총 점수는 {}점!'.format( game.total_game, game.cube.count,
+            #                                                 game.cube.point )
             done_count += 1
-            logging( text, logname )
+            max_rotae = game.cube.count if max_rotae < game.cube.count else max_rotae
+            # logging( text, logname )
 
             print( text )
         if game.total_game % batch == 0 :
@@ -105,12 +108,12 @@ def main( _ ) :
             # 배치별 완성 활률 기록
             batch_track.append( batch_done_percent )
 
-            batch_state = "=================\n게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {},\n전체 큐브 완성 확률 {}%, 배치별 큐브 완성 확률 {}%\n현재까지 확률 추이: {}" \
+            batch_state = "=================\n게임 진행횟수: {}, 전체평균보상: {}, 배치평균보상: {} \n완료 여부 : {},큐브 회전 횟수: {}, 소요시간: {},\n완성한 게임중 최대 회전 횟수: {}회, 전체 큐브 완성 확률 {}%, 배치별 큐브 완성 확률 {}%\n현재까지 확률 추이: {}" \
                 .format( game.total_game, Avg_Allreward, batch_avg_reward, game.cube.done,
-                         game.cube.count, runtime, ALL_done_percent, batch_done_percent,batch_track )
-            print(batch_state)
+                         game.cube.count, runtime, max_rotae, ALL_done_percent, batch_done_percent, batch_track )
+            print( batch_state )
 
-            logging(batch_state,logname)
+            logging( batch_state, logname )
             start = time.time( )
 
 
