@@ -2,59 +2,75 @@ from twistyRL import poketCube
 import numpy as np
 import random
 
-class poketCube100(poketCube):
+class poketCubeLimit(poketCube):
     """
-    무조건 게임이 100번 진행하도록 점수 부여 방식과 게임 완료 방식을 변경함
+    큐브가 완성되면 게임이 종료하는 것이 아닌 무조건 N번을 진행한뒤 게임을 종료하는 방식
     """
-    def check( self ) :
-        """
-        면 상태 체크 메소드, 큐브가 변경되는 시점마다 호출하여 완셩여부와 점수를 확인한다.
-        :return:
-        """
-        # 큐브 완셩 여부 확인
-        done = [ self.cube[ x ].done for x in self.cube ]
-        if False in done :
-            self.done = False
-        else :
-            self.done = True
+    def __init__(self):
+        super(poketCube,self).__init__()
+        # 아무런 행동을 하지 않는 명령어를 추가('N')
+        self.set = self.set.append('N')
+        # 각면이 완성될시 부여할 점수
+        self.facePoint = pow(self.size,2)
+        # 큐브 완성시 부여할 점수
+        self.doneReward = 100
 
-        # 회전 횟수
-        self.count = len( self.history )
+    @property
+    def rotateCount(self):
+        # 'N'을 제외한 회전 횟수를 계수한다
+        return [False if x == 'N' else True for x in self.history].count(True)
 
+    @property
+    def reward( self ) :
+        # 보상 방식 오버라이딩
 
+        # 게임 시작 전일 경우 보상은 0으로 한다
         if self.count == 0:
-            # 게임 시작 전일 경우 보상은 0으로 한다
-            self.reward = 0
-        elif self.done == True:
-            # 큐브가 완성 된 경우 무조건 100 점 부여
-
-        elif True in done:
-            # 완성된 면이 존재할 경우 완성된 면의 갯수*면의 총점수/회전횟수 만큼 보상을 줘서
-            # 많이 회전할수록 점수가 떨어지게 함 즉 단순 회전을 반복하여 고득점하는 기회를 없앰
-            self.reward = pow(self.size,2)
+            return 0
+        # 큐브가 완성 되어 'N' 입력시 100 점 부여
+        elif self.done == True and self.lastAct == 'N':
+            return self.doneReward
+        # 큐브가 완성 되었으나 행동이 N이 아닐경우 -100점 부여(감점)
+        elif self.done == True and self.lastAct != 'N':
+            return  -self.doneReward
+        # 큐브가 완성되기전에 행동이 'N'일 경우 -100점 부여(감점)
+        elif self.done != True and self.lastAct == 'N':
+            return -self.doneReward
+        elif self.facesDone in True:
+            # 일부 완성된 면이 있을 경우 (완성된 면 갯수 * 완성된 면의 점수)만큼 점수를 부여한다.
+            return self.doneCount*self.facePoint
         else:
-            # 큐브가 미완성일경우 점수 없음
-            self.reward = 0
+            # 위의 사항에 해당 되지 않을 경우 0점 부여
+            return 0
+
+    def rotate( self, action ):
+        # 아무런 행동을 안하는 명령어('N') 추가
+        if action == 'N':
+            pass
+        else:
+            super().rotate(action)
+
 
 class Games:
     """
-    여러 큐브 게임을 생성하고 게임 진행을 관리 하는 객
+    여러 큐브 게임을 생성하고 게임 진행을 관리 하는 객체
     """
     def __init__(self,scram_size=25,num_game=5):
 
-        self.cube = poketCube( )
-        self.set = self.cube.set
-        self.cube.getcube()
-        self.total_reward = []
-        self.current_reward = []
+
+        # 전체 점수
+        self.total_rewards = 0
+        # 전체 플레이 횟수
         self.total_game = 0
         # 한번에 플레이할 게임 겟수
         self.num_game = num_game
+        self.current_rewards = [ 0 for x in range(self.num_game) ]
         # 스크램블 길이
         self.scram_size = scram_size
         # 최대 회전 횟수는 스크램블 사이즈의 두배로 고
         self.max_play = self.scram_size*2
         self.games = self.make_game()
+        self.set = self.games[0].set
 
     def make_game(self):
         """
@@ -64,58 +80,72 @@ class Games:
         games = []
         for i in range(self.num_game):
             game = poketCube()
-            game.scramble(self.cube.scram_size)
+            game.scramble(self.scram_size)
             games.append(game)
+        self.current_rewards = [ 0 for x in range(self.num_game) ]
         return games
 
+    @property
+    def states(self):
+        # 각 큐브의 상태
+        return np.array([x.faces for x in self.games])
 
+    @property
+    def rewards(self):
+        # 각 큐브의 점수
+        result = np.array( [x.reward for x in self.games])
+        return np.reshape(result,[-1,1])
 
-    def onehot_state(self,state):
-        # 큐브 상태를 one-hot상태로 변경함
-        size = self.cube.size
-        onehot = None
-        oneline_stat = np.reshape(state,size*size*6)
-
-        for i in range(1,7):
-            # 전체 면에서 숫자 i인 면
-            numstate = oneline_stat == i
-            numstate = np.array(numstate,dtype=np.int)
-            if i == 1:
-                onehot = numstate
-            else:
-                onehot = np.append(onehot,numstate)
-        return onehot.reshape((-1,144))
-
-    def get_state(self):
-        """
-        큐브의 상태를 one-hot으로 바꿔준다
-        """
-        # states = [self.onehot_state(x.faces) for x in self.games]
-        states = [x.faces for x in self.games]
-        return states
-
+    @property
+    def done(self):
+        # 각 큐브의 완성 여부
+        result = np.array( [ x.done for x in self.games ] )
+        return result
 
     def reset(self):
         """자동차, 장애물의 위치와 보상값들을 초기화합니다."""
-        for cube in self.games:
+        for x in range(self.num_game):
+            cube = self.games[x]
             cube.reset()
             cube.scramble(len=self.scram_size,count=1,checkface=2)
-            self.total_game += 1
-            self.current_reward = 0
+            self.current_rewards[x] += self.rewards[x]
+        self.total_game += 1
 
+    def act(self,actions):
+        """
+        회전 명령어 인덱스 값을 회전 명령어로 바꿔준다.
+        :param actions:
+        :return:
+        """
+        return [self.set[x] for x in actions]
 
+    def proceed(self, actions):
+        """
+        회전 명령어 인덱스 값을 입력받아 게임을 진행한다.
+        :param action:
+        :return:
+        """
 
-    def proceed(self, action):
-        # action: 0: 좌, 1: 유지, 2: 우
-        # action - 1 을 하여, 좌표를 액션이 0 일 경우 -1 만큼, 2 일 경우 1 만큼 옮깁니다.
-        act = self.cube.set[action]
+        acts = act(actions)
+        for x in self.num_game:
+            cube = self.games[x]
+            action = acts[x]
+            _,reward,_,_ =cube.action(action)
+            # 현재 게임의 누적 보상
+            self.current_rewards[x] += reward
+
         gameover,reward,count,_ =self.cube.action(act)
         if count == self.max_play:
-            # 100회가 넘어가면 강제로 게임 종료
+            # 진행횟수가 최대 회전횟수(max_play)를 넘어가면 강제로 게임 종료
             gameover = True
 
-        self.current_reward += reward
         if gameover:
-            self.total_reward += self.current_reward
+            self.total_reward += sum(self.current_reward)
 
-        return reward, gameover
+        return self.rewards, gameover
+
+    @property
+    def avgResult(self):
+        # 게임 보상 평균 값
+        return self.total_rewards/(self.num_game*self.total_game)
+

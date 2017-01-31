@@ -6,7 +6,7 @@ import random
 
 class cubeDQN:
 
-    def __init__(self,set,cube_size=2,dropout=1):
+    def __init__(self,set,num_game,cube_size=2,dropout=1):
         """
         트위스티 큐브 Deep Q Netwarks 클래스
         :param set: 명령어 모음집
@@ -20,6 +20,8 @@ class cubeDQN:
         self.set = set
         self.count_set = len(set)
 
+        # 한번에 진행할 게임 수
+        self.num_game = num_game
         # 진행 횟수
         self.count_step = 0
         # 최소 자료 축적 횟
@@ -48,7 +50,7 @@ class cubeDQN:
 
         # 큐브 상태입력
         self.state_x = tf.placeholder( tf.int8, [ None, 6, pow( self.cube_size, 2 ) ] ,name='state')
-        self.float_X = state_x / 10
+        self.float_X = self.state_x / 10
         self.x_cube = tf.reshape( self.float_X, [ -1,  self.cube_size, self.cube_size,6 ] )
         # 회전 방향 입력
         self.action = tf.placeholder( tf.float32, [ None, self.count_set ], name="action" )
@@ -57,7 +59,7 @@ class cubeDQN:
         # 모델 생성
         self.Q_value, self.train_opti = self.build_model()
         # 세션
-        self.session = init_session()
+        self.session = self.init_session()
 
     def init_session(self):
         session = tf.InteractiveSession()
@@ -73,21 +75,21 @@ class cubeDQN:
         h_conv1_cutoff = tf.nn.relu( h_conv1 + b_conv1 )
 
         # 2차 신경망 적용
-        W_conv2 = tf.Variable( tf.truncated_normal( [ size_filter2, size_filter2, num_filters1, num_filters2 ] ) )
+        W_conv2 = tf.Variable( tf.truncated_normal( [ self.size_filter2, self.size_filter2, self.num_filters1, self.num_filters2 ] ) )
         h_conv2 = tf.nn.conv2d(h_conv1_cutoff,W_conv2,strides=[1,1,1,1], padding= 'SAME')
-        b_conv2 = tf.Variable(tf.constant(0.1,shape=[num_filters2]))
+        b_conv2 = tf.Variable(tf.constant(0.1,shape=[self.num_filters2]))
 
         h_conv2_cutoff = tf.nn.relu(h_conv2+b_conv2)
 
         # 풀 커넥티드 레이러을 위한 입력값 갯수(n*n*num_filters2)
-        full_unit1 = pow(size_filter2,2)*num_filters2
+        full_unit1 = pow(self.size_filter2,2)*self.num_filters2
 
         # n*n 행렬 num_filters2개를 1차원 행렬로 만든다
         h_conv2_flat = tf.reshape(h_conv2_cutoff,[-1,full_unit1])
 
         # 풀 커넥티드 레이어
-        w2 = tf.Variable(tf.truncated_normal([self.full_unit1,full_neuron]))
-        b2 = tf.Variable(tf.constant(0.1,shape=[full_neuron]))
+        w2 = tf.Variable(tf.truncated_normal([full_unit1,self.full_neuron]))
+        b2 = tf.Variable(tf.constant(0.1,shape=[self.full_neuron]))
         hidden2 = tf.nn.relu(tf.matmul(h_conv2_flat,w2)+b2)
 
         # 드롭아웃
@@ -125,8 +127,6 @@ class cubeDQN:
 
         # 학습
         if train:
-            Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.before_state } )
-
             self.train_opti.run(feed_dict={self.reward:reward,self.state_x:self.before_state,self.action:act})
         else:
             # 학습 모드가 아닐 경우 바로 액션값을 넘겨준다
@@ -139,15 +139,20 @@ class cubeDQN:
         :return:
         """
         # 무작위 상황에서 랜덤 값을 내놓는다
+        indexs = []
         if train and random.random() <= self.get_random:
-            index = random.randrange(self.count_set)
+            for i in range(self.num_game):
+                indexs.append( random.randrange(self.count_set))
         else:
             # 다음 액션값을 도출할 떄는 state_x에 다음 상태를 넣어준다
-            Q_value = self.Q_value.eval(feed_dict={self.state_x:self.next_state})
-        self.set[index]
+            for i in range(self.num_game):
+                Q_value = self.Q_value.eval(feed_dict={self.state_x:self.next_state[i]})
+                indexs.append(np.argmax(Q_value))
+
         # 랜덤 최소값(minimum_random)보다 get_random값이 크면서 동시에 현재 학습량이 최소 학습량(minimum_train) 보다 클경우
         # 순차적으로 랜덤 값을 줄려 나간다.
         if self.get_random > self.minimum_random and self.total_count > self.minimum_train:
             self.get_random -= 0.99/1000 # 임의로 값을
 
+        return indexs
 
