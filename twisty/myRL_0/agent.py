@@ -18,15 +18,16 @@ size = 144
 # 총 진행할 게임 횟수
 episode = 5000
 batch = 100
+
+# 한게임의 최대 회전 횟수
+max_play = 100
 # 테스트 배치 사이즈
 test_batch_size = 20
 # 스크램 길이 설정
 scram_size = 20
 
-
-
 # 테스트 배치 기록
-test_batch_record = { }
+test_batch_record = {'학습정보':{'스크램길이':scram_size,'최대회전':max_play,'배치사이즈':batch} }
 
 dropout = 0.6
 
@@ -37,7 +38,7 @@ def logging( log, file ) :
         logs.write( '\n{}'.format( log ) )
 
 
-def test( scram_size, brain, batch_size=100 ) :
+def test( scram_size,max_play, brain, batch_size=100 ) :
     """
     학습 결과를 측정하기 위해 여러개의 시뮬레이션을 돌린뒤 평균을 반환한다.
     :param game: game 객체
@@ -45,7 +46,7 @@ def test( scram_size, brain, batch_size=100 ) :
     :param batch_size: 한번 테스트에 실행할 시뮬레이션 갯수
     :return:
     """
-    game = Games()
+    game = Games(scram_size,max_play)
     batch = batch_size
     train = False
     total_reward = [ ]
@@ -78,10 +79,11 @@ def test( scram_size, brain, batch_size=100 ) :
 def main( _ ) :
     try:
         logname = input( "로그 파일 명을 입력하세요!" )
-        game = Games( scram_size )
+        game = Games( scram_size,max_play )
         brain = cubeDQN( game.set, game.size, dropout )
         # 테스트 실행 횟수
         test_run_count = 0
+
         # 시간 측정
         start = time.time( )
 
@@ -106,7 +108,7 @@ def main( _ ) :
 
                 # 학습 결과 테스트
                 test_run_count += 1
-                test_count, test_reward, test_done = test( scram_size,brain,batch_size=test_batch_size )
+                test_count, test_reward, test_done = test( scram_size,max_play,brain,batch_size=test_batch_size )
                 result = { "평균회전횟수" : test_count, "평균보상" : test_reward, "완성확률" : test_done }
                 # 테스트 결과 기록
                 test_batch_record[ test_run_count ] = result

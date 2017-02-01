@@ -58,6 +58,8 @@ class cubeDQN :
         self.Q_value, self.train_opti = self.build_model( )
         # 세션
         self.session = self.init_session( )
+        self.writer = tf.summary.FileWriter( 'logs', self.session.graph )
+        self.summary = tf.summary.merge_all( )
 
     def init_session( self ) :
         session = tf.InteractiveSession( )
@@ -104,8 +106,9 @@ class cubeDQN :
 
         # DQN 손실 함수
         Q_action = tf.reduce_sum( tf.mul( Q_value, self.action ), axis=1 )
-        cost = tf.reduce_mean( tf.square( self.reward_y - Q_action ) )
-        train_op = tf.train.AdamOptimizer( 1e-6 ).minimize( cost )
+        self.cost = tf.reduce_mean( tf.square( self.reward_y - Q_action ) )
+        tf.summary.scalar('cost',self.cost)
+        train_op = tf.train.AdamOptimizer( 1e-6 ).minimize( self.cost )
 
         return Q_value, train_op
 
@@ -141,8 +144,9 @@ class cubeDQN :
                 Q_value = self.Q_value.eval(
                         feed_dict={ self.state_x : self.next_state } )
                 reward_y = [ reward + self.GAMMA * np.max( Q_value ) ]
-            self.train_opti.run(
+            trainlog = self.train_opti.run(
                     feed_dict={ self.reward_y : reward_y, self.state_x : self.before_state, self.action : act } )
+            self.writer.add_summary(trainlog,self.count_step)
         else :
             # 학습 모드가 아닐 경우 바로 액션값을 넘겨준다
             return self.get_action( train=False )
