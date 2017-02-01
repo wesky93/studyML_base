@@ -10,6 +10,7 @@ from game import Games
 from model import cubeDQN
 import time
 from os import path
+import os
 
 tf.app.flags.DEFINE_boolean( "train", True, "학습모드. 게임을 화면에 보여주지 않습니다." )
 FLAGS = tf.app.flags.FLAGS
@@ -33,8 +34,11 @@ dropout = 0.6
 
 
 def logging( log, file ) :
+    folder = 'train_log'
+    if not path.isdir(folder):
+        os.makedirs(folder)
     train_day = time.strftime( '%Y-%m-%d-' )
-    with open( path.join( 'train_log', '{}{}'.format( train_day, file ) ), mode='a' ) as logs :
+    with open( path.join( folder, '{}{}'.format( train_day, file ) ), mode='a' ) as logs :
         logs.write( '\n{}'.format( log ) )
 
 
