@@ -7,7 +7,7 @@ class poketCubeLimit( poketCube ) :
     """
     큐브가 완성되면 게임이 종료하는 것이 아닌 무조건 N번을 진행한뒤 게임을 종료하는 방식
     """
-
+    # todo: self.set 변수명 변경
     def __init__( self ) :
         super( ).__init__( )
         # 큐브 크기
@@ -86,6 +86,7 @@ class Games :
     @property
     def states( self ) :
         # 큐브의 상태
+        # todo: 6*8 형태로 상태 내보내기
         return [self.game.faces]
 
     @property

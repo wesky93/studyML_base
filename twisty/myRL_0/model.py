@@ -64,6 +64,10 @@ class cubeDQN :
         return session
 
     def build_model( self ) :
+        # todo: FCNN레이어 층 추가하기
+        # todo: state 입력 층 변경하기
+        # todo: 바이어스 제거하기
+        # 할일: 첫번째 필터를 4*4로 바꾸기
         # 2*2*6 필터 (루빅스 큐브때는 3*3으로 변경하기)
         W_conv1 = tf.Variable( tf.truncated_normal( [ self.size_filter1, self.size_filter1, 6, self.num_filters1 ] ) )
         # 1차 신경망 적용
