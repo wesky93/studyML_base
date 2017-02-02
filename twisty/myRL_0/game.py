@@ -86,8 +86,23 @@ class Games :
     @property
     def states( self ) :
         # 큐브의 상태
-        # todo: 6*8 형태로 상태 내보내기
-        return [self.game.faces]
+        # 큐브의 각 면을 2*2크기로 바꿔 리스트에 담아둠
+        get_state = [np.reshape(face,(2,2)) for face in self.game.faces]
+        state = np.full((6,8),-1,dtype=np.int8)
+
+        # 2번면 입력
+        state[0:2,2:4] = get_state[1]
+        # 3번면 입력
+        state[2:4,0:2] = get_state[2]
+        # 1번면 입력
+        state[2:4,2:4] = get_state[0]
+        # 4번면 입력
+        state[2:4,4:6] = get_state[3]
+        # 6번면 입력
+        state[2:4,6:] = get_state[5]
+        # 5번면 입력
+        state[4:,2:4] = get_state[4]
+        return state
 
     @property
     def reward( self ) :
