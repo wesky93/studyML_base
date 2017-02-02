@@ -35,10 +35,6 @@ class cubeDQN :
         # 보상 감가상액 비율
         self.GAMMA = 0.99
 
-        # # 드롭아웃
-        # todo: 드롭아웃 활성화 시키기
-        # self.dropout = dropout
-        # self.keep_prob = tf.placeholder( tf.float32, name='dropout' )
         # 최종단계 뉴런 갯수
         self.full_neuron = 1024
 
@@ -94,15 +90,9 @@ class cubeDQN :
         b2 = tf.Variable( tf.constant( 0.1, shape=[ self.full_neuron ] ) )
         hidden2 = tf.nn.relu( tf.matmul( h_conv2_flat, w2 ) + b2 )
 
-        # 드롭아웃
-        # todo: 드롭아웃 활성화시 주석 해제
-        # hidden2_drop = tf.nn.dropout( hidden2, self.keep_prob )
-
         # Q_value
         w0 = tf.Variable( tf.zeros( [ self.full_neuron, self.count_set ] ) )
         b0 = tf.Variable( tf.zeros( [ self.count_set ] ) )
-        # todo:드롭아웃 활성화시 주석 해제
-        # Q_value = tf.matmul( hidden2_drop, w0 ) + b0
         Q_value = tf.matmul( hidden2, w0 ) + b0
 
         # DQN 손실 함수
@@ -139,9 +129,6 @@ class cubeDQN :
             if play_count == 1 :
                 reward_y = [reward]
             else :
-                # todo:드롭아웃 활성화시 주석 해제
-                # Q_value = self.Q_value.eval(
-                #     feed_dict={ self.state_x : self.next_state, self.keep_prob : self.dropout } )
                 Q_value = self.Q_value.eval(
                         feed_dict={ self.state_x : self.next_state } )
                 reward_y = [reward + self.GAMMA * np.max( Q_value[0] )]
@@ -166,8 +153,6 @@ class cubeDQN :
             index = random.randrange( self.count_set )
         else :
             # 다음 액션값을 도출할 떄는 state_x에 다음 상태를 넣어준다
-            # todo:드롭아웃 활성화시 주석 해제
-            # Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.next_state, self.keep_prob : 1 } )
             Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.next_state } )
             index = np.argmax( Q_value )
 
