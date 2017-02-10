@@ -82,7 +82,8 @@ def test( scram_size,max_play, brain, batch_size=100 ) :
 
 def main( _ ) :
     try:
-        logname = input( "로그 파일 명을 입력하세요!" )
+        # logname = input( "로그 파일 명을 입력하세요!" )
+        logname = 'test.log'
         game = Games( scram_size,max_play )
         brain = cubeDQN( game.set, game.size, dropout )
         # 테스트 실행 횟수
@@ -125,7 +126,7 @@ def main( _ ) :
                 print( batch_state )
                 start = time.time( )
     except Exception as e:
-        print(e)
+        raise e
     finally:
         # 프로그램 종료시 테스트 기록을 로깅 및 출력한다.
         logging(test_batch_record,logname)
