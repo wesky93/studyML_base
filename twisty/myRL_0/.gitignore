@@ -58,9 +58,9 @@ docs/_build/
 target/
 
 .idea
-*/model/
-*/logs/
-*/traing_log/
+model/*
+logs/*
+train_log/*
 .DS_Store
 .idea/inspectionProfiles/
 .idea/misc.xml
