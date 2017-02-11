@@ -18,7 +18,7 @@ FLAGS = tf.app.flags.FLAGS
 size = 144
 # 총 진행할 게임 횟수
 episode = 5000
-batch = 1000
+batch = 100
 
 # 한게임의 최대 회전 횟수
 max_play = 50
