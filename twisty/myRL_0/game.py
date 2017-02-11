@@ -46,8 +46,9 @@ class poketCubeLimit( poketCube ) :
             # 일부 완성된 면이 있을 경우 (완성된 면 갯수 * 완성된 면의 점수)만큼 점수를 부여한다.
             return self.doneCount * self.facePoint
         else :
-            # 위의 사항에 해당 되지 않을 경우 -1점 부여
-            return -1
+            # 위의 사항에 해당 되지 않을 경우 -1점 부여 - 제대로 학습이 되지 않음
+            # 그대로 0점 유지
+            return 0
 
     def rotate( self, action ) :
         # 아무런 행동을 안하는 명령어('N') 추가
