@@ -79,6 +79,7 @@ class cubeDQN :
         # todo: state 입력 층 변경하기
         # todo: 바이어스 제거하기
         # 할일: 첫번째 필터를 4*4로 바꾸기
+        # W_conv1 -> [ 필터크기,필터크기, 차원수,필터갯수 ]
         W_conv1 = tf.Variable( tf.truncated_normal( [ self.size_filter1, self.size_filter1, 1, self.num_filters1 ] ) )
         # 1차 신경망 적용
         h_conv1 = tf.nn.conv2d( self.input_x, W_conv1, strides=[ 1, 1, 1, 1 ], padding='SAME', name='L_Input' )
@@ -109,7 +110,7 @@ class cubeDQN :
         full_unit1 = h_conv3_shape[ 0 ] * h_conv3_shape[ 1 ] * self.num_filters3
 
         # n*n 행렬 'num_filters2'개를 1차원 행렬로 만든다
-        h_conv3_flat = tf.reshape( h_conv2_cutoff, [ -1, full_unit1 ] )
+        h_conv3_flat = tf.reshape( h_conv3_cutoff, [ -1, full_unit1 ] )
 
         # 풀 커넥티드 레이어
         w2 = tf.Variable( tf.truncated_normal( [ full_unit1, self.full_neuron ] ) )
