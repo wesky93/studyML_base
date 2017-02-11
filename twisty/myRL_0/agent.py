@@ -18,19 +18,17 @@ FLAGS = tf.app.flags.FLAGS
 size = 144
 # 총 진행할 게임 횟수
 episode = 5000
-batch = 100
+batch = 1000
 
 # 한게임의 최대 회전 횟수
 max_play = 50
 # 테스트 배치 사이즈
-test_batch_size = 20
+test_batch_size = 100
 # 스크램 길이 설정
-scram_size = 5
+scram_size = 20
 
 # 테스트 배치 기록
-test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch } }
-
-dropout = 0.6
+test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch,'테스트배치사이즈':test_batch_size } }
 
 
 def logging( log, file ) :
@@ -91,7 +89,7 @@ def main( _ ) :
 
         # 시간 측정
         start = time.time( )
-
+        print('start training')
         while 1 :
             game.reset( )
             train = True

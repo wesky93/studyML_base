@@ -158,7 +158,7 @@ class cubeDQN :
                     feed_dict={ self.reward_y : reward_y, self.state_x : self.before_state, self.action : act } )
 
             # 텐서보드에 기록
-            if self.count_step % 100 == 0 :
+            if self.count_step % 1000 == 0 :
                 summary = self.summary.eval(
                         feed_dict={ self.reward_y : reward_y, self.state_x : self.before_state, self.action : act } )
                 self.writer.add_summary( summary, self.count_step / 100 )
