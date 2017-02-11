@@ -85,7 +85,7 @@ def main( _ ) :
         # logname = input( "로그 파일 명을 입력하세요!" )
         logname = 'test.log'
         game = Games( scram_size, max_play )
-        brain = cubeDQN( game.set, game.size, dropout )
+        brain = cubeDQN( game.set,num_game=1, cube_size=game.size )
         # 테스트 실행 횟수
         test_run_count = 0
 
@@ -99,13 +99,14 @@ def main( _ ) :
             while not gameover :
                 # DQN 모델을 이용해 실행할 액션을 결정합니다.
                 # 한개의 게임으로 학습을 하기에 action index에서 첫번째 값만 필요함
-                act_index = brain.get_action( [game.states], train )[ 0 ]
+                acts = brain.get_action( game.states, train )
+                act_index = acts[ 0 ]
                 action = game.set[ act_index ]
                 # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
                 reward, gameover = game.proceed( action )
 
                 # DQN 으로 학습을 진행합니다.
-                brain.step( [game.states], act_index, game.reward, train )
+                brain.step( game.states, acts, game.reward, train )
 
             if game.total_game % batch == 0 :
                 # 각 배치 실행 시간 측정

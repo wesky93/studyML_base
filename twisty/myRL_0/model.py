@@ -4,7 +4,7 @@ import random
 
 
 class cubeDQN :
-    def __init__( self, set,num_game=1, cube_size=2, dropout=1 ) :
+    def __init__( self, set,num_game=1, cube_size=2) :
         """
         트위스티 큐브 Deep Q Netwarks 클래스
         :param set: 명령어 모음집
@@ -37,7 +37,7 @@ class cubeDQN :
         # 2차 신경망 필터 사이즈
         self.size_filter2 = 4
 
-        self.num_filters3 = 0
+        self.num_filters3 = 144
         self.size_filter3 = 2
         # 보상 감가상액 비율
         self.GAMMA = 0.99
@@ -67,6 +67,8 @@ class cubeDQN :
 
         self.summary = tf.summary.merge_all( )
 
+
+
     def init_session( self ) :
         session = tf.InteractiveSession( )
         session.run( tf.global_variables_initializer( ) )
@@ -82,7 +84,7 @@ class cubeDQN :
         h_conv1 = tf.nn.conv2d( self.input_x, W_conv1, strides=[ 1, 1, 1, 1 ], padding='SAME', name='L_Input' )
         h_conv1_cutoff = tf.nn.relu( h_conv1 )
         print( h_conv1_cutoff )
-        # 6*8 -> 6*8 유자
+        # 6*8 -> 6*8 유지
         h_conv1_shape = (self.state_shapeX, self.state_shapeY)
 
         # 2차 신경망 적용
@@ -99,13 +101,14 @@ class cubeDQN :
             tf.truncated_normal( [ self.size_filter3, self.size_filter3, self.num_filters2, self.num_filters3 ] ) )
         h_conv3 = tf.nn.conv2d( h_conv2_cutoff, W_conv3, strides=[ 1, 1, 1, 1 ], padding='VALID', name='L_hidden2' )
         h_conv3_cutoff = tf.nn.relu( h_conv3 )
+        print(h_conv3_cutoff)
         # 3*5 -> 2*4
         h_conv3_shape = (h_conv2_shape[ 0 ] - self.size_filter3 + 1, h_conv2_shape[ 1 ] - self.size_filter3 + 1)
 
         # 풀 커넥티드 레이러을 위한 입력값 갯수(n*n*num_filters2)
         full_unit1 = h_conv3_shape[ 0 ] * h_conv3_shape[ 1 ] * self.num_filters3
 
-        # n*n 행렬 num_filters2개를 1차원 행렬로 만든다
+        # n*n 행렬 'num_filters2'개를 1차원 행렬로 만든다
         h_conv3_flat = tf.reshape( h_conv2_cutoff, [ -1, full_unit1 ] )
 
         # 풀 커넥티드 레이어
@@ -141,11 +144,11 @@ class cubeDQN :
         self.next_state = new_state
         # 현재 액션 할당
         self.input_action = action
-        act = np.zeros( self.num_game,self.count_set )
+        act = np.zeros( (self.num_game,self.count_set) )
+        # todo: numpy만으로 해결할 방법 찾기
         for x in range(self.num_game):
             act[x][self.input_action[x]] = 1
-        # todo: numpy만으로 해결할 방법 찾기
-
+        # todo: DQN 구현하기 - 메모리에 학습할것을 보관한뒤 랜덤으로 자료를 추출하여 학습하기
         # 학습
         if train :
             Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.next_state } )
@@ -156,7 +159,7 @@ class cubeDQN :
             # 텐서보드에 기록
             if self.count_step % 100 == 0 :
                 summary = self.summary.eval(
-                    feed_dict={ self.reward_y : reward_y, self.state_x : self.before_state, self.action : act } )
+                        feed_dict={ self.reward_y : reward_y, self.state_x : self.before_state, self.action : act } )
                 self.writer.add_summary( summary, self.count_step / 100 )
         else :
             # 학습 모드가 아닐 경우 바로 액션값을 넘겨준다
@@ -175,7 +178,7 @@ class cubeDQN :
 
         # 무작위 상황에서 랜덤 값을 내놓는다
         if train and random.random( ) <= self.get_random :
-            index = random.randrange( self.count_set )
+            index = [random.randrange( self.count_set ) for _ in range(self.num_game)]
         else :
             # 다음 액션값을 도출할 떄는 state_x에 다음 상태를 넣어준다
             Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.before_state } )
