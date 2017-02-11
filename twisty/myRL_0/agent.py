@@ -15,10 +15,8 @@ import os
 tf.app.flags.DEFINE_boolean( "train", True, "학습모드. 게임을 화면에 보여주지 않습니다." )
 FLAGS = tf.app.flags.FLAGS
 
-size = 144
-# 총 진행할 게임 횟수
-episode = 5000
-batch = 100
+#배치 사이즈
+batch = 1000
 
 # 한게임의 최대 회전 횟수
 max_play = 50
