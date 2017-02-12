@@ -1,5 +1,4 @@
 #! /bin/bash
 
-rm -rf model/*
-rm -rf logs/*
+rm -rf logs/test/
 rm -rf train_log/*

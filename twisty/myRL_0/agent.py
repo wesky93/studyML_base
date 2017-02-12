@@ -25,6 +25,9 @@ test_batch_size = 100
 # 스크램 길이 설정
 scram_size = 20
 
+# 실험 이름(logs 기록에 사용됨)
+lab = 'lab1'
+
 # 테스트 배치 기록
 test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch,'테스트배치사이즈':test_batch_size } }
 
@@ -81,7 +84,7 @@ def main( _ ) :
         # logname = input( "로그 파일 명을 입력하세요!" )
         logname = 'test.log'
         game = Games( scram_size, max_play )
-        brain = cubeDQN( game.set,num_game=1, cube_size=game.size )
+        brain = cubeDQN( game.set,num_game=1, cube_size=game.size,lab=lab )
         # 테스트 실행 횟수
         test_run_count = 0
 

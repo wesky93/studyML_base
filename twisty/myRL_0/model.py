@@ -1,10 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import random
-
+from os import path
 
 class cubeDQN :
-    def __init__( self, set,num_game=1, cube_size=2) :
+    def __init__( self, set,num_game=1, cube_size=2,lab='test') :
         """
         트위스티 큐브 Deep Q Netwarks 클래스
         :param set: 명령어 모음집
@@ -63,7 +63,7 @@ class cubeDQN :
         self.Q_value, self.train_opti = self.build_model( )
         # 세션
         self.session = self.init_session( )
-        self.writer = tf.summary.FileWriter( 'logs', self.session.graph )
+        self.writer = tf.summary.FileWriter( path.join('logs',lab,), self.session.graph )
 
         self.summary = tf.summary.merge_all( )
 
