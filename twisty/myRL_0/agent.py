@@ -16,14 +16,14 @@ tf.app.flags.DEFINE_boolean( "train", True, "학습모드. 게임을 화면에 �
 FLAGS = tf.app.flags.FLAGS
 
 #배치 사이즈
-batch = 1000
+batch = 200
 
 # 한게임의 최대 회전 횟수
 max_play = 50
 # 테스트 배치 사이즈
 test_batch_size = 100
 # 스크램 길이 설정
-scram_size = 20
+scram_size = 10
 
 # 실험 이름(logs 기록에 사용됨)
 lab = 'lab1'
@@ -82,7 +82,7 @@ def test( scram_size, max_play, brain, batch_size=100 ) :
 def main( _ ) :
     try :
         # logname = input( "로그 파일 명을 입력하세요!" )
-        logname = 'test.log'
+        logname = lab
         game = Games( scram_size, max_play )
         brain = cubeDQN( game.set,num_game=1, cube_size=game.size,lab=lab )
         # 테스트 실행 횟수
