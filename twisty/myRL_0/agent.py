@@ -26,7 +26,7 @@ test_batch_size = 100
 scram_size = 10
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab1'
+lab = 'lab2'
 
 # 테스트 배치 기록
 test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch,'테스트배치사이즈':test_batch_size } }

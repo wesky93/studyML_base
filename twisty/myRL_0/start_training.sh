@@ -3,5 +3,3 @@
 git pull
 
 python3 agent.py
-
-source tensorboard.sh
