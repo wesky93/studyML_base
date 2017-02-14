@@ -24,7 +24,7 @@ class cubeDQN :
         # 진행 횟수
         self.count_step = 0
         # 최소 자료 축적 횟수
-        self.minimum_train = 1000
+        self.minimum_train = 100000
 
         # 1차 신경망 뉴런수
         # todo: 뉴런 갯수 조절 필요
@@ -47,7 +47,7 @@ class cubeDQN :
 
         # getaction 램덤 확률
         self.get_random = 1.0
-        self.minimum_random = 0.01
+        self.minimum_random = 0.001
 
         # 큐브 상태 shape
         self.state_shapeX = self.cube_size * 3
@@ -189,6 +189,7 @@ class cubeDQN :
         # 랜덤 최소값(minimum_random)보다 get_random값이 크면서 동시에 현재 학습량이 최소 학습량(minimum_train) 보다 클경우
         # 순차적으로 랜덤 값을 줄려 나간다.
         if self.get_random > self.minimum_random and self.count_step > self.minimum_train :
-            self.get_random -= 0.99 / 1000  # 임의로 값을
+            # 랜덤 확률 차감 값을 동적으로 변경 -> (최대확률 - 최소확률)/최소 학습 횟수
+            self.get_random -= (1.0-self.minimum_random) / self.minimum_train  # 임의로 값을
 
         return index
