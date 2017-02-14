@@ -79,47 +79,52 @@ class cubeDQN :
         # todo: state 입력 층 변경하기
         # todo: 바이어스 제거하기
         # 할일: 첫번째 필터를 4*4로 바꾸기
-        # W_conv1 -> [ 필터크기,필터크기, 차원수,필터갯수 ]
-        W_conv1 = tf.Variable( tf.truncated_normal( [ self.size_filter1, self.size_filter1, 1, self.num_filters1 ] ) )
-        # 1차 신경망 적용
-        h_conv1 = tf.nn.conv2d( self.input_x, W_conv1, strides=[ 1, 1, 1, 1 ], padding='SAME', name='L_Input' )
-        h_conv1_cutoff = tf.nn.relu( h_conv1 )
-        print( h_conv1_cutoff )
-        # 6*8 -> 6*8 유지
-        h_conv1_shape = (self.state_shapeX, self.state_shapeY)
+        with tf.name_scope('input_layer'):
+            # W_conv1 -> [ 필터크기,필터크기, 차원수,필터갯수 ]
+            W_conv1 = tf.Variable( tf.truncated_normal( [ self.size_filter1, self.size_filter1, 1, self.num_filters1 ] ) )
+            # 1차 신경망 적용
+            h_conv1 = tf.nn.conv2d( self.input_x, W_conv1, strides=[ 1, 1, 1, 1 ], padding='SAME', name='L_Input' )
+            h_conv1_cutoff = tf.nn.relu( h_conv1 )
+            # print( h_conv1_cutoff )
+            # 6*8 -> 6*8 유지
+            h_conv1_shape = (self.state_shapeX, self.state_shapeY)
 
-        # 2차 신경망 적용
-        W_conv2 = tf.Variable(
-                tf.truncated_normal( [ self.size_filter2, self.size_filter2, self.num_filters1, self.num_filters2 ] ) )
-        h_conv2 = tf.nn.conv2d( h_conv1_cutoff, W_conv2, strides=[ 1, 1, 1, 1 ], padding='VALID', name='L_hidden1' )
-        h_conv2_cutoff = tf.nn.relu( h_conv2 )
-        # 6*8 -> 3*5 로 바뀜
-        h_conv2_shape = (h_conv1_shape[ 0 ] - self.size_filter2 + 1, h_conv1_shape[ 1 ] - self.size_filter2 + 1)
-        print( h_conv2_cutoff )
+        with tf.name_scope('hidden1_layer'):
+            # 2차 신경망 적용
+            W_conv2 = tf.Variable(
+                    tf.truncated_normal( [ self.size_filter2, self.size_filter2, self.num_filters1, self.num_filters2 ] ) )
+            h_conv2 = tf.nn.conv2d( h_conv1_cutoff, W_conv2, strides=[ 1, 1, 1, 1 ], padding='VALID', name='L_hidden1' )
+            h_conv2_cutoff = tf.nn.relu( h_conv2 )
+            # 6*8 -> 3*5 로 바뀜
+            h_conv2_shape = (h_conv1_shape[ 0 ] - self.size_filter2 + 1, h_conv1_shape[ 1 ] - self.size_filter2 + 1)
+            # print( h_conv2_cutoff )
 
-        # 3차 신경망 적용
-        W_conv3 = tf.Variable(
-            tf.truncated_normal( [ self.size_filter3, self.size_filter3, self.num_filters2, self.num_filters3 ] ) )
-        h_conv3 = tf.nn.conv2d( h_conv2_cutoff, W_conv3, strides=[ 1, 1, 1, 1 ], padding='VALID', name='L_hidden2' )
-        h_conv3_cutoff = tf.nn.relu( h_conv3 )
-        print(h_conv3_cutoff)
-        # 3*5 -> 2*4
-        h_conv3_shape = (h_conv2_shape[ 0 ] - self.size_filter3 + 1, h_conv2_shape[ 1 ] - self.size_filter3 + 1)
+        with tf.name_scope('hidden2_layer'):
+            # 3차 신경망 적용
+            W_conv3 = tf.Variable(
+                tf.truncated_normal( [ self.size_filter3, self.size_filter3, self.num_filters2, self.num_filters3 ] ) )
+            h_conv3 = tf.nn.conv2d( h_conv2_cutoff, W_conv3, strides=[ 1, 1, 1, 1 ], padding='VALID', name='L_hidden2' )
+            h_conv3_cutoff = tf.nn.relu( h_conv3 )
+            # print(h_conv3_cutoff)
+            # 3*5 -> 2*4
+            h_conv3_shape = (h_conv2_shape[ 0 ] - self.size_filter3 + 1, h_conv2_shape[ 1 ] - self.size_filter3 + 1)
 
-        # 풀 커넥티드 레이러을 위한 입력값 갯수(n*n*num_filters2)
-        full_unit1 = h_conv3_shape[ 0 ] * h_conv3_shape[ 1 ] * self.num_filters3
+        with tf.name_scope('FC_layer'):
+            # 풀 커넥티드 레이러을 위한 입력값 갯수(n*n*num_filters2)
+            full_unit1 = h_conv3_shape[ 0 ] * h_conv3_shape[ 1 ] * self.num_filters3
 
-        # n*n 행렬 'num_filters2'개를 1차원 행렬로 만든다
-        h_conv3_flat = tf.reshape( h_conv3_cutoff, [ -1, full_unit1 ] )
+            # n*n 행렬 'num_filters2'개를 1차원 행렬로 만든다
+            h_conv3_flat = tf.reshape( h_conv3_cutoff, [ -1, full_unit1 ] )
 
-        # 풀 커넥티드 레이어
-        w2 = tf.Variable( tf.truncated_normal( [ full_unit1, self.full_neuron ] ) )
-        fully_conect = tf.nn.relu( tf.matmul( h_conv3_flat, w2 ) )
+            # 풀 커넥티드 레이어
+            w2 = tf.Variable( tf.truncated_normal( [ full_unit1, self.full_neuron ] ) )
+            fully_conect = tf.nn.relu( tf.matmul( h_conv3_flat, w2 ) )
 
-        # Q_value
-        w0 = tf.Variable( tf.zeros( [ self.full_neuron, self.count_set ] ) )
-        b0 = tf.Variable( tf.zeros( [ self.count_set ] ) )
-        Q_value = tf.matmul( fully_conect, w0 ) + b0
+        with tf.name_scope('Q_NET'):
+            # Q_value
+            w0 = tf.Variable( tf.zeros( [ self.full_neuron, self.count_set ] ) )
+            b0 = tf.Variable( tf.zeros( [ self.count_set ] ) )
+            Q_value = tf.matmul( fully_conect, w0 ) + b0
 
         # DQN 손실 함수
         Q_action = tf.reduce_sum( tf.mul( Q_value, self.action ), axis=1 )
