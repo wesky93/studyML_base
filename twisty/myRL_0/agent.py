@@ -26,7 +26,7 @@ test_batch_size = 100
 scram_size = 10
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab2'
+lab = 'lab3'
 
 # 테스트 배치 기록
 test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch,'테스트배치사이즈':test_batch_size } }
@@ -115,6 +115,9 @@ def main( _ ) :
                 # 학습 결과 테스트
                 test_run_count += 1
                 test_count, test_reward, test_done = test( scram_size, max_play, brain, batch_size=test_batch_size )
+                # 텐서보드에 테스트 결과 기록
+                brain.reward_log( test_run_count * test_batch_size, test_reward, test_count, test_done )
+                # 콘솔에 테스트 결과 출력
                 result = { "평균회전횟수" : test_count, "평균보상" : test_reward, "완성확률" : test_done }
                 # 테스트 결과 기록
                 test_batch_record[ test_run_count ] = result

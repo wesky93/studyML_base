@@ -40,7 +40,7 @@ class cubeDQN :
         self.num_filters3 = 144
         self.size_filter3 = 2
         # 보상 감가상액 비율
-        self.GAMMA = 0.99
+        self.GAMMA = 0.5
 
         # 최종단계 뉴런 갯수
         self.full_neuron = 1024
@@ -126,16 +126,19 @@ class cubeDQN :
             b0 = tf.Variable( tf.zeros( [ self.count_set ] ) )
             Q_value = tf.matmul( fully_conect, w0 ) + b0
 
-        # DQN 손실 함수
-        Q_action = tf.reduce_sum( tf.mul( Q_value, self.action ), axis=1 )
-        cost = tf.reduce_sum( tf.square( self.reward_y - Q_action ) )
+        with tf.name_scope('Q_action'):
+            # DQN 손실 함수
+            Q_action = tf.reduce_sum( tf.mul( Q_value, self.action ), axis=1 )
+        with tf.name_scope('cost_function'):
+            cost = tf.reduce_sum( tf.square( self.reward_y - Q_action ) )
         tf.summary.scalar( 'cost', cost )
-        train_op = tf.train.AdamOptimizer( 1e-6 ).minimize( cost )
+        with tf.name_scope('Training'):
+            train_op = tf.train.AdamOptimizer( 1e-6 ).minimize( cost )
 
         return Q_value, train_op
 
     # 매 스탭마다 학습하도록 함
-    def step( self, new_state, action, reward, train=True ) :
+    def step( self, new_state, action, reward, train=True) :
         """
         학습 실행 - 기본적으로 다수의 큐브게임을 동시에 플레이 할 수 있다.
         그래서 state,action,reward 모두 돌리는 게임 갯수만큼 리스트에 관련사항을 담아 전달 해야 함
@@ -171,6 +174,19 @@ class cubeDQN :
             # 학습 모드가 아닐 경우 바로 액션값을 넘겨준다
             return self.get_action( self.next_state,train=False )
 
+    def reward_log(self,playtime,avg_reward,avg_count,per_done):
+        """
+        검증 자료의 평균 보상을 텐서보드에 기록함
+        :param count:
+        :param avg_reward:
+        :return:
+        """
+        summary = tf.Summary()
+        summary.value.add( tag='avg_reward', simple_value=avg_reward )
+        summary.value.add( tag='avg_count',simple_value=avg_count)
+        summary.value.add( tag='per_done',simple_value=per_done)
+        self.writer.add_summary(summary,playtime)
+
     def get_action( self, state, train=True ) :
         """
         상태를 입력받아 행동을 리턴합니다.
@@ -187,7 +203,7 @@ class cubeDQN :
             index = [random.randrange( self.count_set ) for _ in range(self.num_game)]
         else :
             # 다음 액션값을 도출할 떄는 state_x에 다음 상태를 넣어준다
-            Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.before_state } )
+            Q_value = self.Q_value.eval( feed_dict={ self.state_x : self.before_state })
             # 게임 갯수와 상관없이 각각의 행동을 도출한다.
             index = np.argmax( Q_value,axis=1 )
 
