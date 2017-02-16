@@ -40,7 +40,7 @@ class cubeDQN :
         self.num_filters3 = 144
         self.size_filter3 = 2
         # 보상 감가상액 비율
-        self.GAMMA = 0.5
+        self.GAMMA = 0.99
 
         # 최종단계 뉴런 갯수
         self.full_neuron = 1024
