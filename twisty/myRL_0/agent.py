@@ -113,7 +113,7 @@ def main( _ ) :
             # 텐서보드에 테스트 결과 기록
             brain.reward_log( test_run_count * test_batch_size, test_reward, test_count, test_done )
             # 콘솔에 테스트 결과 출력
-            bach_state = "==== 테스트 결과 ====\n" \
+            batch_state = "==== 테스트 결과 ====\n" \
                           "게임 진행횟수: {}, 평균보상: {}, 큐브 완성 확률: {}\n" \
                           "평균 회전 횟수: {}, 소요시간: {}" \
                 .format( game.total_game, test_reward, test_done,
