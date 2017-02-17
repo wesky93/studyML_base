@@ -53,8 +53,7 @@ class cubeDQN :
         self.minimum_random = 0.001
         # 최소 학습량 - 랜덤확률을 최소 학습량 만큼 유지한다.
         self.minimum_step = 100000
-        # 학습 횟수
-        self.train_count = 0
+
 
         # 큐브 상태 shape
         self.state_shapeX = self.cube_size * 3
@@ -151,7 +150,7 @@ class cubeDQN :
         :return:
         """
 
-        self.train_count += 1
+        self.train_step += 1
         train_batch = random.sample( self.replay_memory, self.replay_batch_size )
 
         state = [ data[ 0 ] for data in train_batch ]
