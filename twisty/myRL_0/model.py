@@ -25,9 +25,9 @@ class cubeDQN :
         # 이전 플레이 기록
         self.replay_memory = deque( )
         # 이전 플레이 기록 갯수
-        self.replay_memory_size = 10000
+        self.replay_memory_size = 50000
         # 한번에 학습할 배치 사이즈
-        self.replay_batch_size = 10
+        self.replay_batch_size = 50
 
         # 1차 신경망 뉴런수
         # todo: 뉴런 갯수 조절 필요
