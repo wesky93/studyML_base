@@ -111,7 +111,7 @@ def main( _ ) :
             test_run_count += 1
             test_count, test_reward, test_done = test( scram_size, max_play, brain, batch_size=test_batch_size )
             # 텐서보드에 테스트 결과 기록
-            brain.reward_log( test_run_count * test_batch_size, test_reward, test_count, test_done )
+            brain.reward_log( game.total_game, test_reward, test_count, test_done )
             # 콘솔에 테스트 결과 출력
             batch_state = "==== 테스트 결과 ====\n" \
                           "게임 진행횟수: {}, 평균보상: {}, 큐브 완성 확률: {}\n" \
