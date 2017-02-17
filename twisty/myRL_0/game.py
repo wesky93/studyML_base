@@ -56,12 +56,13 @@ class poketCubeLimit( poketCube ) :
             pass
         else :
             super( ).rotate( action )
+
     @property
-    def done(self):
-        if self.count==0:
+    def done( self ) :
+        if self.count == 0 :
             return False
-        else:
-            super().done
+        else :
+            super( ).done
 
     def action( self, action ) :
         """
@@ -70,9 +71,9 @@ class poketCubeLimit( poketCube ) :
         :return: (완료여부,점수,회전횟수,큐브화면)
         """
         # 큐브가 완성 될경우 아무런 행동을 하지 않는다.
-        if self.count!=0 and self.done:
+        if self.count != 0 and self.done :
             pass
-        else:
+        else :
             self.rotate( action )
             # 회전 기록
             self.history.append( action )
@@ -80,6 +81,7 @@ class poketCubeLimit( poketCube ) :
 
         self.point += self.reward
         return (self.done, self.reward, self.count, self.faces)
+
 
 class Games :
     """
@@ -114,20 +116,20 @@ class Games :
         # 큐브의 상태
         # 큐브의 각 면을 2*2크기로 바꿔 리스트에 담아둠
         get_state = [ np.reshape( face, (2, 2) ) for face in self.game.faces ]
-        state = np.full( (1, 6, 8), -1. )
+        state = np.full( (6, 8), -1. )
 
         # 2번면 입력
-        state[ 0, 0 :2, 2 :4 ] = get_state[ 1 ]
+        state[ 0 :2, 2 :4 ] = get_state[ 1 ]
         # 3번면 입력
-        state[ 0, 2 :4, 0 :2 ] = get_state[ 2 ]
+        state[ 2 :4, 0 :2 ] = get_state[ 2 ]
         # 1번면 입력
-        state[ 0, 2 :4, 2 :4 ] = get_state[ 0 ]
+        state[ 2 :4, 2 :4 ] = get_state[ 0 ]
         # 4번면 입력
-        state[ 0, 2 :4, 4 :6 ] = get_state[ 3 ]
+        state[ 2 :4, 4 :6 ] = get_state[ 3 ]
         # 6번면 입력
-        state[ 0, 2 :4, 6 : ] = get_state[ 5 ]
+        state[ 2 :4, 6 : ] = get_state[ 5 ]
         # 5번면 입력
-        state[ 0, 4 :, 2 :4 ] = get_state[ 4 ]
+        state[ 4 :, 2 :4 ] = get_state[ 4 ]
         return state
 
     @property

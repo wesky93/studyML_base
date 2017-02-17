@@ -15,7 +15,7 @@ import os
 tf.app.flags.DEFINE_boolean( "train", True, "학습모드. 게임을 화면에 보여주지 않습니다." )
 FLAGS = tf.app.flags.FLAGS
 
-#배치 사이즈
+# 배치 사이즈
 batch = 200
 
 # 한게임의 최대 회전 횟수
@@ -29,7 +29,9 @@ scram_size = 5
 lab = 'lab4'
 
 # 테스트 배치 기록
-test_batch_record = { '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch,'테스트배치사이즈':test_batch_size } }
+test_batch_record = {
+    '학습정보' : { '스크램길이' : scram_size, '최대회전' : max_play, '배치사이즈' : batch, '테스트배치사이즈' : test_batch_size }
+    }
 
 
 def logging( log, file ) :
@@ -41,7 +43,7 @@ def logging( log, file ) :
         logs.write( '\n{}'.format( log ) )
 
 
-def test( scram_size, max_play, brain, batch_size=100 ) :
+def test( scram_size, max_play, DQN, batch_size=100 ) :
     """
     학습 결과를 측정하기 위해 여러개의 시뮬레이션을 돌린뒤 평균을 반환한다.
     :param game: game 객체
@@ -49,6 +51,7 @@ def test( scram_size, max_play, brain, batch_size=100 ) :
     :param batch_size: 한번 테스트에 실행할 시뮬레이션 갯수
     :return:
     """
+    brain = DQN
     game = Games( scram_size, max_play )
     batch = batch_size
     train = False
@@ -60,10 +63,11 @@ def test( scram_size, max_play, brain, batch_size=100 ) :
         game.reset( )
         rewards = [ ]
         gameover = False
+        act = brain.get_action( state=game.states, train=train )
         while not gameover :
-            action = brain.get_action( game.states, train )[0]
-            action = game.set[ action ]
+            action = game.set[ act ]
             reward, gameover = game.proceed( action )
+            act = brain.step( game.states, action, reward, gameover, train )
             rewards.append( reward )
         # 전체 보상 기록에 추가
         total_reward.append( sum( rewards ) )
@@ -84,28 +88,33 @@ def main( _ ) :
         # logname = input( "로그 파일 명을 입력하세요!" )
         logname = lab
         game = Games( scram_size, max_play )
-        brain = cubeDQN( game.set,num_game=1, cube_size=game.size,lab=lab )
+        brain = cubeDQN( game.set, cube_size=game.size, lab=lab )
         # 테스트 실행 횟수
         test_run_count = 0
 
         # 시간 측정
         start = time.time( )
-        print('start training')
+        print( 'start training' )
         while 1 :
             game.reset( )
+            # todo: 처음 게임을 시작할때는 getaction시 상태값을 보내게 만들고 이후엔 상태값 입력없이 진행하게 한다.
             train = True
-            gameover = False
-            while not gameover :
+            # 처음 진행할 경우 현재 상태를 이용하여 액션값을 가져온다
+            acts = brain.get_action( state=game.states, train=train )
+            # 게임 진행 여부
+            end = False
+
+            while not end :
                 # DQN 모델을 이용해 실행할 액션을 결정합니다.
-                # 한개의 게임으로 학습을 하기에 action index에서 첫번째 값만 필요함
-                acts = brain.get_action( game.states, train )
-                act_index = acts[ 0 ]
-                action = game.set[ act_index ]
+                action = game.set[ acts ]
                 # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
                 reward, gameover = game.proceed( action )
 
-                # DQN 으로 학습을 진행합니다.
-                brain.step( game.states, acts, game.reward, train )
+                # DQN 으로 학습을 진행한뒤 다음 액션값을 받아온다.
+                acts = brain.step( game.states, acts, game.reward, train )
+                # 게임이 종료되면 반복을 끝낸다.
+                if gameover :
+                    end = True
 
             if game.total_game % batch == 0 :
                 # 각 배치 실행 시간 측정
