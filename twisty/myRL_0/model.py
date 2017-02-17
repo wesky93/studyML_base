@@ -80,10 +80,10 @@ class cubeDQN :
         return session
 
     def build_model( self ) :
-        # todo: FCNN레이어 층 추가하기
-        # todo: state 입력 층 변경하기
-        # todo: 바이어스 제거하기
-        # 할일: 첫번째 필터를 4*4로 바꾸기
+        """
+        학습 모델 구성
+        :return: Q()텐서,train텐서
+        """
         with tf.name_scope( 'input_layer' ) :
             # W_conv1 -> [ 필터크기,필터크기, 차원수,필터갯수 ]
             W_conv1 = tf.Variable(
