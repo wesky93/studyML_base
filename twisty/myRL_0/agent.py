@@ -26,7 +26,7 @@ test_batch_size = 100
 scram_size = 5
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab4'
+lab = 'lab5'
 
 # 테스트 배치 기록
 test_batch_record = {
