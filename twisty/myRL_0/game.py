@@ -19,6 +19,11 @@ class poketCubeLimit( poketCube ) :
         self.activeInit( )
         self.doneReward = 100
 
+        # 처음 큐브를 완성했는지(명령어 N값에 점수를 주기위함)
+        self.finish = False
+        # 큐브가 완성된 이후 마지막 행동
+        self.finish_last_act = None
+
     @property
     def rotateCount( self ) :
         # 큐브가 완성되면 history 기록을 하지 않기에 단순히 history 카운팅만 하면 됨
@@ -33,11 +38,16 @@ class poketCubeLimit( poketCube ) :
         # 게임 시작 전일 경우 보상은 0으로 한다
         if self.count == 0 :
             return 0
+        # 처음 큐브를 완성한 경우 만점을 부여한다.
+        elif self.done == True and self.finish == False and self.lastAct != 'N':
+            return self.doneCount*self.facePoint
         # 큐브가 완성 되어 'N' 입력시 100 점 부여
-        elif self.done == True and self.lastAct == 'N' :
+        elif self.finish == True and self.finish_last_act == 'N' :
+            assert self.done == True
             return self.doneReward
         # 큐브가 완성 되었으나 행동이 N이 아닐경우 -100점 부여(감점)
-        elif self.done == True and self.lastAct != 'N' :
+        elif self.finish == True and self.finish_last_act != 'N' :
+            assert self.done == True
             return -self.doneReward
         # 큐브가 완성되기전에 행동이 'N'일 경우 -100점 부여(감점)
         elif self.done != True and self.lastAct == 'N' :
@@ -62,7 +72,7 @@ class poketCubeLimit( poketCube ) :
         if self.count == 0 :
             return False
         else :
-            super( ).done
+            return super( ).done
 
     def action( self, action ) :
         """
@@ -70,9 +80,12 @@ class poketCubeLimit( poketCube ) :
         :param act: 회전 방향 기호
         :return: (완료여부,점수,회전횟수,큐브화면)
         """
+        # 만약 이전에 큐브과 완성되었을 경우 이후 진행상황은 진행이 안되도록 표시한다.
+        if self.done == True and self.finish == False:
+            self.finish = True
         # 큐브가 완성 될경우 아무런 행동을 하지 않는다.
-        if self.count != 0 and self.done :
-            pass
+        if self.finish == True :
+            self.finish_last_act = action
         else :
             self.rotate( action )
             # 회전 기록
@@ -154,6 +167,7 @@ class Games :
         """큐브 게임을 초기화 한다"""
         self.game.reset( )
         self.game.scramble( len=self.scram_size, count=1, checkface=6 )
+        self.game.finish = False
         self.current_reward = 0
         self.total_game += 1
 
@@ -165,7 +179,7 @@ class Games :
         """
         gameover = False
         act = action
-        _, reward, count, _ = self.game.action( act )
+        done, reward, count, _ = self.game.action( act )
         # 현재 게임의 누적 보상
         self.current_reward += reward
         if count == self.max_play :
