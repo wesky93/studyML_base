@@ -23,7 +23,8 @@ class poketCubeLimit( poketCube ) :
         self.finish = False
         # 큐브가 완성된 이후 마지막 행동
         self.finish_last_act = None
-
+        # 큐브를 완성했을 경우
+        self.done_roate_count = 0
     @property
     def rotateCount( self ) :
         # 큐브가 완성되면 history 기록을 하지 않기에 단순히 history 카운팅만 하면 됨
@@ -39,7 +40,7 @@ class poketCubeLimit( poketCube ) :
         if self.count == 0 :
             return 0
         # 처음 큐브를 완성한 경우 만점을 부여한다.
-        elif self.done == True and self.finish == False and self.lastAct != 'N':
+        elif self.done == True and self.finish == False:
             return self.doneCount*self.facePoint
         # 큐브가 완성 되어 'N' 입력시 100 점 부여
         elif self.finish == True and self.finish_last_act == 'N' :
@@ -80,16 +81,19 @@ class poketCubeLimit( poketCube ) :
         :param act: 회전 방향 기호
         :return: (완료여부,점수,회전횟수,큐브화면)
         """
+        # 회전 기록
+        self.history.append( action )
+
         # 만약 이전에 큐브과 완성되었을 경우 이후 진행상황은 진행이 안되도록 표시한다.
         if self.done == True and self.finish == False:
+            self.done_roate_count = self.rotateCount
             self.finish = True
         # 큐브가 완성 될경우 아무런 행동을 하지 않는다.
         if self.finish == True :
             self.finish_last_act = action
         else :
             self.rotate( action )
-            # 회전 기록
-            self.history.append( action )
+
             # todo:180되 회전 명령어대신 90도 명령어가 2번 표기 되도록 변경
 
         self.point += self.reward
@@ -157,7 +161,10 @@ class Games :
 
     @property
     def count( self ) :
-        return self.game.rotateCount
+        if self.done == True:
+            return self.game.done_roate_count
+        else:
+            return self.game.rotateCount
 
     @property
     def history( self ) :

@@ -23,7 +23,7 @@ max_play = 50
 # 테스트 배치 사이즈
 test_batch_size = 100
 # 스크램 길이 설정
-scram_size = 5
+scram_size = 3
 
 # 실험 이름(logs 기록에 사용됨)
 lab = 'lab7'
