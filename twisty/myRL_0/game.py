@@ -153,7 +153,7 @@ class Games :
     def reset( self ) :
         """큐브 게임을 초기화 한다"""
         self.game.reset( )
-        self.game.scramble( len=self.scram_size, count=1, checkface=2 )
+        self.game.scramble( len=self.scram_size, count=1, checkface=6 )
         self.current_reward = 0
         self.total_game += 1
 

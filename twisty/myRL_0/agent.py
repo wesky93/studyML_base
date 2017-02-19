@@ -26,7 +26,7 @@ test_batch_size = 100
 scram_size = 5
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab5'
+lab = 'lab6'
 # 불러올 이전 학습 자료, 불러오지 않을경우 None
 load_lab = None
 
