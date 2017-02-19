@@ -150,7 +150,7 @@ class cubeDQN :
             # 3*5 -> 2*4
             h_conv3_shape = (h_conv2_shape[ 0 ] - self.size_filter3 + 1, h_conv2_shape[ 1 ] - self.size_filter3 + 1)
 
-        with tf.name_scope( 'FC_layer' ) :
+        with tf.name_scope( 'hidden3_layer' ) :
             # 풀 커넥티드 레이러을 위한 입력값 갯수(n*n*num_filters2)
             full_unit1 = h_conv3_shape[ 0 ] * h_conv3_shape[ 1 ] * self.num_filters3
 
@@ -161,7 +161,8 @@ class cubeDQN :
             w2 = tf.Variable( tf.truncated_normal( [ full_unit1, self.full_neuron ] ) )
             fully_conect = tf.nn.relu( tf.matmul( h_conv3_flat, w2 ) )
 
-        with tf.name_scope( 'Q_NET' ) :
+        # todo: 이전의 FC레이어가 실상 히든레이어이고 Q-net 레이어가 FC레이어로 유추되나 정확한 확인이 필요
+        with tf.name_scope( 'FC_layer' ) :
             # Q_value
             w0 = tf.Variable( tf.zeros( [ self.full_neuron, self.count_set ] ) )
             b0 = tf.Variable( tf.zeros( [ self.count_set ] ) )
@@ -268,7 +269,7 @@ class cubeDQN :
         :return:
         """
         # 만약 상태값이 없을 경우 이전 게임의 상태값을 기반으로 행동을 구한다.
-        self.before_state = self.next_state if type(state) == type(None) else state
+        self.before_state = self.next_state if type( state ) == type( None ) else state
 
         # 무작위 상황에서 랜덤 값을 내놓는다
         if train and random.random( ) <= self.get_random :
