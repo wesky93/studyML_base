@@ -36,26 +36,26 @@ class cubeDQN :
         # 이전 플레이 기록 갯수
         self.replay_memory_size = 50000
         # 한번에 학습할 배치 사이즈
-        self.replay_batch_size = 50
+        self.replay_batch_size = 100
 
         # 1차 신경망 뉴런수
         # todo: 뉴런 갯수 조절 필요
-        self.num_filters1 = 36
+        self.num_filters1 = 360
         # 1차 신경망 필터 사이즈
         self.size_filter1 = 4
 
         # 2차 신경망 뉴런수
-        self.num_filters2 = 72
+        self.num_filters2 = 720
         # 2차 신경망 필터 사이즈
         self.size_filter2 = 4
 
-        self.num_filters3 = 144
+        self.num_filters3 = 1440
         self.size_filter3 = 2
         # 보상 감가상액 비율
         self.GAMMA = 0.99
 
         # 최종단계 뉴런 갯수
-        self.full_neuron = 1024
+        self.full_neuron = 2048
 
         # getaction 램덤 확률
         self.get_random = 1.0

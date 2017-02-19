@@ -19,14 +19,14 @@ FLAGS = tf.app.flags.FLAGS
 batch = 200
 
 # 한게임의 최대 회전 횟수
-max_play = 50
+max_play = 100
 # 테스트 배치 사이즈
 test_batch_size = 100
 # 스크램 길이 설정
 scram_size = 3
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab7'
+lab = 'lab8'
 # 불러올 이전 학습 자료, 불러오지 않을경우 None
 load_lab = None
 
