@@ -27,6 +27,8 @@ scram_size = 5
 
 # 실험 이름(logs 기록에 사용됨)
 lab = 'lab5'
+# 불러올 이전 학습 자료, 불러오지 않을경우 None
+load_lab = None
 
 def test( scram_size, max_play, DQN, batch_size=100 ) :
     """
@@ -72,54 +74,63 @@ def main( _ ) :
     # logname = input( "로그 파일 명을 입력하세요!" )
     logname = lab
     game = Games( scram_size, max_play )
-    brain = cubeDQN( game.set, cube_size=game.size, lab=lab )
+    if type(load_lab) == type(None):
+        brain = cubeDQN( game.set, cube_size=game.size, lab=lab )
+    else:
+        brain = cubeDQN(game.set,cube_size=game.size,lab=lab,load_file=load_lab)
     # 테스트 실행 횟수
     test_run_count = 0
 
     # 시간 측정
     start = time.time( )
     print( 'start training' )
-    while 1 :
-        game.reset( )
-        # todo: 처음 게임을 시작할때는 getaction시 상태값을 보내게 만들고 이후엔 상태값 입력없이 진행하게 한다.
-        train = True
-        # 처음 진행할 경우 현재 상태를 이용하여 액션값을 가져온다
-        acts = brain.get_action( state=game.states, train=train )
-        # 게임 진행 여부
-        end = False
+    try:
+        while 1 :
+            game.reset( )
+            # todo: 처음 게임을 시작할때는 getaction시 상태값을 보내게 만들고 이후엔 상태값 입력없이 진행하게 한다.
+            train = True
+            # 처음 진행할 경우 현재 상태를 이용하여 액션값을 가져온다
+            acts = brain.get_action( state=game.states, train=train )
+            # 게임 진행 여부
+            end = False
 
-        # 게임 진행
-        while not end :
-            # DQN 모델을 이용해 실행할 액션을 결정합니다.
-            action = game.set[ acts ]
-            # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
-            reward, gameover = game.proceed( action )
+            # 게임 진행
+            while not end :
+                # DQN 모델을 이용해 실행할 액션을 결정합니다.
+                action = game.set[ acts ]
+                # 결정한 액션을 이용해 게임을 진행하고, 보상과 게임의 종료 여부를 받아옵니다.
+                reward, gameover = game.proceed( action )
 
-            # DQN 으로 학습을 진행한뒤 다음 액션값을 받아온다.
-            acts = brain.step( game.states, acts, game.reward, train )
-            # 게임이 종료되면 반복을 끝낸다.
-            if gameover :
-                end = True
+                # DQN 으로 학습을 진행한뒤 다음 액션값을 받아온다.
+                acts = brain.step( game.states, acts, game.reward, train )
+                # 게임이 종료되면 반복을 끝낸다.
+                if gameover :
+                    end = True
 
-        # 한 게임이 끝난뒤 결과를 기록한다
-        if game.total_game % batch == 0 :
-            # 각 배치 실행 시간 측정
-            end = time.time( )
-            runtime = end - start
+            # 한 게임이 끝난뒤 결과를 기록한다
+            if game.total_game % batch == 0 :
+                # 각 배치 실행 시간 측정
+                end = time.time( )
+                runtime = end - start
 
-            # 학습 결과 테스트
-            test_run_count += 1
-            test_count, test_reward, test_done = test( scram_size, max_play, brain, batch_size=test_batch_size )
-            # 텐서보드에 테스트 결과 기록
-            brain.reward_log( game.total_game, test_reward, test_count, test_done )
-            # 콘솔에 테스트 결과 출력
-            batch_state = "==== 테스트 결과 ====\n" \
-                          "게임 진행횟수: {}, 평균보상: {}, 큐브 완성 확률: {}\n" \
-                          "평균 회전 횟수: {}, 소요시간: {}" \
-                .format( game.total_game, test_reward, test_done,
-                         test_count, runtime )
-            print( batch_state )
-            start = time.time( )
+                # 학습 결과 테스트
+                test_run_count += 1
+                test_count, test_reward, test_done = test( scram_size, max_play, brain, batch_size=test_batch_size )
+                # 텐서보드에 테스트 결과 기록
+                brain.reward_log( game.total_game, test_reward, test_count, test_done )
+                # 콘솔에 테스트 결과 출력
+                batch_state = "==== 테스트 결과 ====\n" \
+                              "게임 진행횟수: {}, 평균보상: {}, 큐브 완성 확률: {}\n" \
+                              "평균 회전 횟수: {}, 소요시간: {}" \
+                    .format( game.total_game, test_reward, test_done,
+                             test_count, runtime )
+                print( batch_state )
+                start = time.time( )
+    except Exception as e:
+        raise e
+    finally:
+        # 현재까지 학습한 내용을 저장합니다
+        brain.save_model()
 
 if __name__ == '__main__' :
     tf.app.run( )
