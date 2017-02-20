@@ -6,7 +6,7 @@ from collections import deque
 
 
 class cubeDQN :
-    def __init__( self, set, cube_size=2, lab='test', load_file=None ) :
+    def __init__( self, set, cube_size=2, lab='test', load_file=None,layer1=36,layer2=72,layer3=144,fc=1024 ) :
         """
         트위스티 큐브 Deep Q Netwarks 클래스
         :param set: 명령어 모음집
@@ -40,28 +40,28 @@ class cubeDQN :
 
         # 1차 신경망 뉴런수
         # todo: 뉴런 갯수 조절 필요
-        self.num_filters1 = 360
+        self.num_filters1 = layer1
         # 1차 신경망 필터 사이즈
         self.size_filter1 = 4
 
         # 2차 신경망 뉴런수
-        self.num_filters2 = 720
+        self.num_filters2 = layer2
         # 2차 신경망 필터 사이즈
         self.size_filter2 = 4
 
-        self.num_filters3 = 1440
+        self.num_filters3 = layer3
         self.size_filter3 = 2
         # 보상 감가상액 비율
         self.GAMMA = 0.99
 
         # 최종단계 뉴런 갯수
-        self.full_neuron = 2048
+        self.full_neuron = fc
 
         # getaction 램덤 확률
         self.get_random = 1.0
         self.minimum_random = 0.001
         # 최소 학습량 - 랜덤확률을 최소 학습량 만큼 유지한다.
-        self.minimum_step = 100000
+        self.minimum_step = 10000
 
         # 큐브 상태 shape
         self.state_shapeX = self.cube_size * 3

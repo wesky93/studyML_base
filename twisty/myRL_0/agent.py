@@ -26,9 +26,16 @@ test_batch_size = 100
 scram_size = 3
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab8'
+lab = 'lab9'
 # 불러올 이전 학습 자료, 불러오지 않을경우 None
 load_lab = None
+
+# 뉴런 갯수 조절
+layer1 = 144
+layer2 = 288
+layer3 = 576
+fc = 2048
+
 
 def test( scram_size, max_play, DQN, batch_size=100 ) :
     """
@@ -74,17 +81,18 @@ def main( _ ) :
     # logname = input( "로그 파일 명을 입력하세요!" )
     logname = lab
     game = Games( scram_size, max_play )
-    if type(load_lab) == type(None):
-        brain = cubeDQN( game.set, cube_size=game.size, lab=lab )
-    else:
-        brain = cubeDQN(game.set,cube_size=game.size,lab=lab,load_file=load_lab)
+    if type( load_lab ) == type( None ) :
+        brain = cubeDQN( game.set, cube_size=game.size, lab=lab, layer1=layer1, layer2=layer2, layer3=layer3, fc=fc )
+    else :
+        brain = cubeDQN( game.set, cube_size=game.size, lab=lab, load_file=load_lab, layer1=layer1, layer2=layer2,
+                         layer3=layer3, fc=fc )
     # 테스트 실행 횟수
     test_run_count = 0
 
     # 시간 측정
     start = time.time( )
     print( 'start training' )
-    try:
+    try :
         while 1 :
             game.reset( )
             # todo: 처음 게임을 시작할때는 getaction시 상태값을 보내게 만들고 이후엔 상태값 입력없이 진행하게 한다.
@@ -126,11 +134,12 @@ def main( _ ) :
                              test_count, runtime )
                 print( batch_state )
                 start = time.time( )
-    except Exception as e:
+    except Exception as e :
         raise e
-    finally:
+    finally :
         # 현재까지 학습한 내용을 저장합니다
-        brain.save_model()
+        brain.save_model( )
+
 
 if __name__ == '__main__' :
     tf.app.run( )
