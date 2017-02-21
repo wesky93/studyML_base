@@ -26,15 +26,15 @@ test_batch_size = 100
 scram_size = 3
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab10'
+lab = 'lab11'
 # 불러올 이전 학습 자료, 불러오지 않을경우 None
 load_lab = None
 
 # 뉴런 갯수 조절
-layer1 = 144
-layer2 = 288
-layer3 = 576
-fc = 2048
+layer1 = 36
+layer2 = 72
+layer3 = 144
+fc = 1024
 
 
 def test( scram_size, max_play, DQN, batch_size=100 ) :
@@ -73,12 +73,12 @@ def test( scram_size, max_play, DQN, batch_size=100 ) :
     # 테스트 전체 평균 회전 횟수
     avg_counts = sum( total_count ) / batch
     # 큐브를 완성한 횟수
-    game_clears = total_count.count( True )
+    game_clears = total_done.count( True )
     # 테스트 결과중 완성된 큐브의 평균 회전수
     total_done_count = [ 0 if x == max_play else x for x in total_count ]
-    avg_done_counts = sum( total_done_count ) / total_done.count( True )
+    avg_done_counts = sum( total_done_count ) / game_clears
     # 테스트 큐브 완성 확률
-    per_done = total_done.count( True ) / batch * 100
+    per_done = game_clears / batch * 100
     return avg_counts, avg_rewards, per_done, avg_done_counts
 
 
