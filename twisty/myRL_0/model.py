@@ -1,12 +1,12 @@
 import tensorflow as tf
 import numpy as np
 import random
-from os import path,mkdir
+from os import path, mkdir
 from collections import deque
 
 
 class cubeDQN :
-    def __init__( self, set, cube_size=2, lab='test', load_file=None,layer1=36,layer2=72,layer3=144,fc=1024 ) :
+    def __init__( self, set, cube_size=2, lab='test', load_file=None, layer1=36, layer2=72, layer3=144, fc=1024 ) :
         """
         트위스티 큐브 Deep Q Netwarks 클래스
         :param set: 명령어 모음집
@@ -14,14 +14,14 @@ class cubeDQN :
         :param dropout:
         """
         # 학습정보를 저장할 폴더가 없을시 생성
-        for dir in ['logs','model']:
-            if not path.isdir(dir):
-                mkdir(dir)
+        for dir in [ 'logs', 'model' ] :
+            if not path.isdir( dir ) :
+                mkdir( dir )
 
         # 실험이름
         self.lab = lab
         # 초기화에 사용할 이전 학습자료
-        self.load=load_file
+        self.load = load_file
 
         # 큐브 크기 - 포켓큐브 크기가 작아서 cnn이 제대로 안되면 루빅스큐브로 변경하기
         self.cube_size = cube_size
@@ -77,11 +77,11 @@ class cubeDQN :
         self.Q_value, self.train_opti = self.build_model( )
         # 세션생성
         # 불러올 이전 학습 자료가 없을 경우 모든 변수를 초기화 한다.
-        if type(self.load) == type(None) :
+        if type( self.load ) == type( None ) :
             self.session = self.init_session( )
         # 불러올 자료가 있으면 해당 자료로 변수를 복구한다.
-        else:
-            self.session = self.load_model()
+        else :
+            self.session = self.load_model( )
 
         self.writer = tf.summary.FileWriter( path.join( 'logs', self.lab, ), self.session.graph )
 
@@ -94,22 +94,22 @@ class cubeDQN :
 
     def save_model( self ) :
         # 현재까지 학습한것을 저장한다
-        save_path = path.join( 'model','{}.ckpt'.format(self.lab) )
+        save_path = path.join( 'model', '{}.ckpt'.format( self.lab ) )
         saver = tf.train.Saver( )
         # model에 랩이름을 파일명으로 저장한다.
         saver.save( self.session, save_path )
-        print( "현재까지 학습한 것을 {}에 저장 했습니다".format(save_path) )
+        print( "현재까지 학습한 것을 {}에 저장 했습니다".format( save_path ) )
 
     def load_model( self ) :
         # 이전 학습 내용이 존재할 경우 모든 변수를 초기화 하지 않고 이전 학습 내용을 불러 냅니다.
         # 불러올 파일경로
-        load_path = path.join('model','{}.ckpt'.format(self.load))
+        load_path = path.join( 'model', '{}.ckpt'.format( self.load ) )
 
         session = tf.InteractiveSession( )
         saver = tf.train.Saver( )
-        assert type(self.load) != type(None)
-        saver.restore(session, load_path)
-        print('{}의 변수로 초기화 했습니다'.format(load_path))
+        assert type( self.load ) != type( None )
+        saver.restore( session, load_path )
+        print( '{}의 변수로 초기화 했습니다'.format( load_path ) )
         return session
 
     def build_model( self ) :
@@ -247,7 +247,7 @@ class cubeDQN :
 
         return self.get_action( self.next_state, train=train )
 
-    def reward_log( self, playtime, avg_reward, avg_count, per_done, avg_done_count ) :
+    def reward_log( self, playtime, avg_reward, avg_count, per_done, avg_done_count, avg_done_reward ) :
         """
         검증 자료의 평균 보상을 텐서보드에 기록함
         :param count:
@@ -255,10 +255,11 @@ class cubeDQN :
         :return:
         """
         summary = tf.Summary( )
-        summary.value.add( tag='avg_reward', simple_value=avg_reward )
-        summary.value.add( tag='avg_count', simple_value=avg_count )
+        summary.value.add( tag='avg_total_reward', simple_value=avg_reward )
+        summary.value.add( tag='avg_total_count', simple_value=avg_count )
         summary.value.add( tag='per_done', simple_value=per_done )
-        summary.value.add( tag='avg_done_count',simple_value=avg_done_count)
+        summary.value.add( tag='avg_done_count', simple_value=avg_done_count )
+        summary.value.add( tag='avg_done_reward', simple_value=avg_done_reward )
         self.writer.add_summary( summary, playtime )
 
     def get_action( self, state=None, train=True ) :
