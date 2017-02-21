@@ -70,11 +70,16 @@ def test( scram_size, max_play, DQN, batch_size=100 ) :
 
     # 테스트 평균 보상
     avg_rewards = sum( total_reward ) / batch
-    # 테스트 평균 회전 횟수
+    # 테스트 전체 평균 회전 횟수
     avg_counts = sum( total_count ) / batch
+    # 큐브를 완성한 횟수
+    game_clears = total_count.count( True )
+    # 테스트 결과중 완성된 큐브의 평균 회전수
+    total_done_count = [ 0 if x == max_play else x for x in total_count ]
+    avg_done_counts = sum( total_done_count ) / total_done.count( True )
     # 테스트 큐브 완성 확률
-    per_done = total_count.count( True ) / batch * 100
-    return avg_counts, avg_rewards, per_done
+    per_done = total_done.count( True ) / batch * 100
+    return avg_counts, avg_rewards, per_done, avg_done_counts
 
 
 def main( _ ) :
@@ -123,9 +128,10 @@ def main( _ ) :
 
                 # 학습 결과 테스트
                 test_run_count += 1
-                test_count, test_reward, test_done = test( scram_size, max_play, brain, batch_size=test_batch_size )
+                test_count, test_reward, test_done, test_done_count = test( scram_size, max_play, brain,
+                                                                            batch_size=test_batch_size )
                 # 텐서보드에 테스트 결과 기록
-                brain.reward_log( game.total_game, test_reward, test_count, test_done )
+                brain.reward_log( game.total_game, test_reward, test_count, test_done, test_done_count )
                 # 콘솔에 테스트 결과 출력
                 batch_state = "==== 테스트 결과 ====\n" \
                               "게임 진행횟수: {}, 평균보상: {}, 큐브 완성 확률: {}\n" \

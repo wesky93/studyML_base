@@ -247,7 +247,7 @@ class cubeDQN :
 
         return self.get_action( self.next_state, train=train )
 
-    def reward_log( self, playtime, avg_reward, avg_count, per_done ) :
+    def reward_log( self, playtime, avg_reward, avg_count, per_done, avg_done_count ) :
         """
         검증 자료의 평균 보상을 텐서보드에 기록함
         :param count:
@@ -258,6 +258,7 @@ class cubeDQN :
         summary.value.add( tag='avg_reward', simple_value=avg_reward )
         summary.value.add( tag='avg_count', simple_value=avg_count )
         summary.value.add( tag='per_done', simple_value=per_done )
+        summary.value.add( tag='avg_done_count',simple_value=avg_done_count)
         self.writer.add_summary( summary, playtime )
 
     def get_action( self, state=None, train=True ) :
