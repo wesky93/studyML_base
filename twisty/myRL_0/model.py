@@ -258,8 +258,10 @@ class cubeDQN :
         summary.value.add( tag='avg_total_reward', simple_value=avg_reward )
         summary.value.add( tag='avg_total_count', simple_value=avg_count )
         summary.value.add( tag='per_done', simple_value=per_done )
-        summary.value.add( tag='avg_done_count', simple_value=avg_done_count )
-        summary.value.add( tag='avg_done_reward', simple_value=avg_done_reward )
+        # 완성된 큐브가 없을경우(per_done==0) 완성된 큐브의 평균값을 기록하지 않는다
+        if per_done != 0:
+            summary.value.add( tag='avg_done_count', simple_value=avg_done_count )
+            summary.value.add( tag='avg_done_reward', simple_value=avg_done_reward )
         self.writer.add_summary( summary, playtime )
 
     def get_action( self, state=None, train=True ) :

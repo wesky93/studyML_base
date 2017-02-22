@@ -79,8 +79,8 @@ def test( scram_size, max_play, DQN, batch_size=100 ) :
 
     # 완성된 큐브가 없을경우 None값을 반환한다.
     if game_clears == 0:
-        avg_done_reward = 0
-        avg_done_counts = 0
+        avg_done_reward = None
+        avg_done_counts = None
     else:
         # 테스트 결과중 완성된 큐브의 평균 회전수
         total_done_count = [ 0 if x == max_play else x for x in total_count ]
