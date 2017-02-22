@@ -77,13 +77,18 @@ def test( scram_size, max_play, DQN, batch_size=100 ) :
     # 큐브를 완성한 횟수
     game_clears = total_done.count( True )
 
-    # 테스트 결과중 완성된 큐브의 평균 회전수
-    total_done_count = [ 0 if x == max_play else x for x in total_count ]
-    avg_done_counts = sum( total_done_count ) / game_clears
+    # 완성된 큐브가 없을경우 None값을 반환한다.
+    if game_clears == 0:
+        avg_done_reward = 0
+        avg_done_counts = 0
+    else:
+        # 테스트 결과중 완성된 큐브의 평균 회전수
+        total_done_count = [ 0 if x == max_play else x for x in total_count ]
+        avg_done_counts = sum( total_done_count ) / game_clears
 
-    # 테스트 결과중 완성된 큐브의 평균 보상
-    total_done_reward = [ 0 if done == False else reward for done, reward in zip( total_done, total_reward ) ]
-    avg_done_reward = sum( total_done_reward ) / game_clears
+        # 테스트 결과중 완성된 큐브의 평균 보상
+        total_done_reward = [ 0 if done == False else reward for done, reward in zip( total_done, total_reward ) ]
+        avg_done_reward = sum( total_done_reward ) / game_clears
 
     # 테스트 큐브 완성 확률
     per_done = game_clears / batch * 100
