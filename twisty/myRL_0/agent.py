@@ -26,9 +26,9 @@ test_batch_size = 100
 scram_size = 10
 
 # 실험 이름(logs 기록에 사용됨)
-lab = 'lab12'
+lab = 'lab13'
 # 불러올 이전 학습 자료, 불러오지 않을경우 None
-load_lab = 'lab11'
+load_lab = None
 
 # 뉴런 갯수 조절
 layer1 = 36
